@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/views/verify_email_view.dart';
 import 'package:mynotes/main.dart';
 import 'dart:developer' as devtools show log;
@@ -64,7 +65,7 @@ class _LoginViewState extends State<LoginView> {
                     );
                 Navigator.of(
                   context,
-                ).pushNamedAndRemoveUntil('/notes/', (route) => false);
+                ).pushNamedAndRemoveUntil(notesRoute, (route) => false);
                 final user = userCredential.user;
 
                 if (user != null && !user.emailVerified) {
@@ -106,7 +107,7 @@ class _LoginViewState extends State<LoginView> {
             onPressed: () {
               Navigator.of(
                 context,
-              ).pushNamedAndRemoveUntil('/register/', (route) => false);
+              ).pushNamedAndRemoveUntil(registerRoute, (route) => false);
             },
             child: Text('Not registered yet? Register here'),
           ),
