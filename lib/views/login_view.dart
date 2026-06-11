@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mynotes/views/verify_email_view.dart';
+import 'package:mynotes/main.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -59,7 +61,33 @@ class _LoginViewState extends State<LoginView> {
                       email: email,
                       password: password,
                     );
-                print(userCredential);
+                final user = userCredential.user;
+
+                if (user != null && !user.emailVerified) {
+                  await user.sendEmailVerification();
+
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Please verify your email. Check your inbox!',
+                        ),
+                      ),
+                    );
+
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const VerifyEmailView(),
+                      ),
+                    );
+                  }
+                } else {
+                  if (mounted) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const HomePage()),
+                    );
+                  }
+                }
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'user-not-found') {
                   print('User not found');

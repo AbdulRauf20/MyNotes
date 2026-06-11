@@ -59,6 +59,12 @@ class _RegisterViewState extends State<RegisterView> {
                       email: email,
                       password: password,
                     );
+                await userCredential.user?.sendEmailVerification();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Verification email sent! Check your inbox.'),
+                  ),
+                );
 
                 print(userCredential);
               } on FirebaseAuthException catch (e) {

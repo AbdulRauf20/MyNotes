@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'apiKey',
+    apiKey: 'api',
     appId: '1:902926438376:web:791420f50992f7ef595e5d',
     messagingSenderId: '902926438376',
     projectId: 'mynotes-app-020',
