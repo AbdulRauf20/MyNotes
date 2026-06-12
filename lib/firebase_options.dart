@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'api',
+    apiKey: 'AIzaSyAtFBVYArhbspyM722hSa0WN-bQT_CM6X0',
     appId: '1:902926438376:web:791420f50992f7ef595e5d',
     messagingSenderId: '902926438376',
     projectId: 'mynotes-app-020',
@@ -77,7 +77,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAtFBVYArhbspyM722hSa0WN-bQT_CM6X0',
+    apiKey: 'api',
     appId: '1:902926438376:web:cdf70927c962d544595e5d',
     messagingSenderId: '902926438376',
     projectId: 'mynotes-app-020',

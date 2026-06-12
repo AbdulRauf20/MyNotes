@@ -101,10 +101,10 @@ class _LoginViewState extends State<LoginView> {
                   await showErrorDialog(context, 'User not found');
                 } else if (e.code == 'wrong-password') {
                   await showErrorDialog(context, 'Wrong password');
-                } else{
+                } else {
                   await showErrorDialog(context, 'Error ${e.code}');
                 }
-              } catch(e){
+              } catch (e) {
                 await showErrorDialog(context, e.toString());
               }
             },
@@ -127,4 +127,3 @@ class _LoginViewState extends State<LoginView> {
 extension on double {
   get code => null;
 }
-
