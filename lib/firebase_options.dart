@@ -77,7 +77,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'api',
+    apiKey: 'AIzaSyBaQcLASP8sdZk6PmvbJ1vCRQUeKHHqK4E',
     appId: '1:902926438376:web:cdf70927c962d544595e5d',
     messagingSenderId: '902926438376',
     projectId: 'mynotes-app-020',
