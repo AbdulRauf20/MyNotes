@@ -36,6 +36,37 @@ void main() {
       },
       timeout: const Timeout(const Duration(seconds: 2)),
     );
+
+    test('create user should delegate to login funtion', () async {
+      final BadEmailUser = provider.createUser(
+        email: 'mrrauf228@gmail.com',
+        password: 'password',
+      );
+
+      expect(BadEmailUser, throwsA(const TypeMatcher<UserNotFoundException>()));
+      final BadPasswordUser = provider.createUser(
+        email: 'someone@bar.com',
+        password: 'RAUFKHAN',
+      );
+      expect(
+        BadPasswordUser,
+        throwsA(const TypeMatcher<WrongPasswordException>()),
+      );
+
+      final user = await provider.createUser(
+        email: 'mrrauf250@gmail.com',
+        password: 'RAUFKHAN',
+      );
+      expect(provider.currentUser, user);
+      expect(user.isEmailVerified, false);
+    });
+
+    test('login user should be able to get verified', () {
+      provider.sendEmailVerification();
+      final user = provider.currentUser;
+      expect(user, isNotNull);
+      expect(user!.isEmailVerified, true);
+    });
   });
 }
 
