@@ -6,23 +6,37 @@ import 'package:mynotes/services/auth/auth_user.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Mock Authencation', (){
+  group('Mock Authencation', () {
     final provider = MockAuthProvider();
-    test('should not be initialized at first', (){
+    test('should not be initialized at first', () {
       expect(provider._isInitialized, false);
-
     });
 
     test('can not log out if not inilized', () {
       expect(
-          provider.logOut(),
-          throwsA(const TypeMatcher<NotInitializedExcepation>()));
-
+        provider.logOut(),
+        throwsA(const TypeMatcher<NotInitializedExcepation>()),
+      );
     });
 
-    
-  });
+    test('should be able to be inilized ', () async {
+      await provider.initialize();
+      expect(provider._isInitialized, true);
+    });
 
+    test('user should be null after iniliazation', () {
+      expect(provider.currentUser, null);
+    });
+
+    test(
+      'should be able to inilize in less than 2 sec',
+      () async {
+        await provider.initialize();
+        expect(provider._isInitialized, true);
+      },
+      timeout: const Timeout(const Duration(seconds: 2)),
+    );
+  });
 }
 
 class NotInitializedExcepation implements Exception {}
@@ -68,11 +82,11 @@ class MockAuthProvider implements AuthProvider {
   }
 
   @override
-  Future<void> sendEmailVerification() async{
+  Future<void> sendEmailVerification() async {
     if (!_isInitialized) throw NotInitializedExcepation();
     final user = _user;
     if (user == null) throw UserNotFoundException();
     const newUser = AuthUser(isEmailVerified: true);
-    _user  = newUser;
+    _user = newUser;
   }
 }
