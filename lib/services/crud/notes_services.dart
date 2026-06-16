@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart'
     show MissingPlatformDirectoryException, getApplicationDocumentsDirectory;
@@ -9,31 +10,49 @@ class UnableToGetDocumentsDirectory implements Exception {}
 
 class DatabaseIsNotOpen implements Exception {}
 
-class CouldNotDeleteUser implements Exception{}
+class CouldNotDeleteUser implements Exception {}
 
-class userAlreadyExists implements Exception{}
+class userAlreadyExists implements Exception {}
+
+class couldNotFoundUser implements Exception {}
+
 class NotesService {
   Database? _db;
 
-Future <DatabaseUser> createUser({required String email}) async {
-  final db = _getDatabaseOrThrow();
-  final results = await db.query(
-    userTable,
-    limit: 1,
-    where: 'email = ?',
-    whereArgs: [email.toLowerCase()],
-  );
-  if (results.isNotEmpty){
-    throw userAlreadyExists();
+  Future<DatabaseUser> getUser({required String email}) async {
+    final db = _getDatabaseOrThrow();
+    final results = await db.query(
+      userTable,
+      limit: 1,
+      where: 'email = ?',
+      whereArgs: [email.toLowerCase()],
+    );
+
+    if (results.isEmpty) {
+      throw couldNotFoundUser();
+    } else {
+      return DatabaseUser.fromRow(results.first);
+    }
   }
 
+  Future<DatabaseUser> createUser({required String email}) async {
+    final db = _getDatabaseOrThrow();
+    final results = await db.query(
+      userTable,
+      limit: 1,
+      where: 'email = ?',
+      whereArgs: [email.toLowerCase()],
+    );
+    if (results.isNotEmpty) {
+      throw userAlreadyExists();
+    }
 
- final userId = await db.insert(userTable, {
-    emailColumn: email.toLowerCase(),
-  });
+    final userId = await db.insert(userTable, {
+      emailColumn: email.toLowerCase(),
+    });
 
-  return DatabaseUser(id: userId, email: email);
-}
+    return DatabaseUser(id: userId, email: email);
+  }
 
   Future<void> deleteUser({required String email}) async {
     final db = _getDatabaseOrThrow();
@@ -42,7 +61,7 @@ Future <DatabaseUser> createUser({required String email}) async {
       where: 'email =?',
       whereArgs: [email.toLowerCase()],
     );
-    if (deleteCount != 1){
+    if (deleteCount != 1) {
       throw CouldNotDeleteUser();
     }
   }
