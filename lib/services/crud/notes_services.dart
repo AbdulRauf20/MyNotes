@@ -1,13 +1,51 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart'
-    show getApplicationDocumentsDirectory;
+    show MissingPlatformDirectoryException, getApplicationDocumentsDirectory;
 import 'package:path/path.dart' show join;
 
+class DatabaseAlreadyOpenException implements Exception {}
+
+class UnableToGetDocumentsDirectory implements Exception {}
 
 class NotesService {
-  
-}
+  Database? _db;
 
+  Future<void> open() async {
+    if (_db != null) throw DatabaseAlreadyOpenException();
+    try {
+      final docsPath = await getApplicationDocumentsDirectory();
+      final dbPath = join(docsPath.path, dbName);
+      final db = await openDatabase(dbPath);
+      _db = db;
+
+      //create user table
+      const createUserTable =
+          '''
+      CREATE TABLE IF NOT EXISTS $userTable (
+        id INT SERIAL PRIMARY KEY ,
+        email TEXT NOT NULL UNIQUE
+      );
+      ''';
+
+      await db.execute(createUserTable);
+
+      const CreateNoteTable =
+          '''
+        CREATE TABLE IF NOT EXISTS $notesTable (
+          id INT SERIAL PRIMARY KEY,
+          user_id INT NOT NULL,
+          text TEXT NOT NULL,
+          is_synched_with_cloud BOOLEAN NOT NULL DEFAULT false,
+          FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+      ''';
+
+      await db.execute(CreateNoteTable);
+    } on MissingPlatformDirectoryException {
+      throw UnableToGetDocumentsDirectory();
+    }
+  }
+}
 
 class DatabaseUser {
   final int id;
