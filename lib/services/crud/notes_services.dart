@@ -19,26 +19,8 @@ class NotesService {
       _db = db;
 
       //create user table
-      const createUserTable =
-          '''
-      CREATE TABLE IF NOT EXISTS $userTable (
-        id INT SERIAL PRIMARY KEY ,
-        email TEXT NOT NULL UNIQUE
-      );
-      ''';
 
       await db.execute(createUserTable);
-
-      const CreateNoteTable =
-          '''
-        CREATE TABLE IF NOT EXISTS $notesTable (
-          id INT SERIAL PRIMARY KEY,
-          user_id INT NOT NULL,
-          text TEXT NOT NULL,
-          is_synched_with_cloud BOOLEAN NOT NULL DEFAULT false,
-          FOREIGN KEY (user_id) REFERENCES users(id)
-      );
-      ''';
 
       await db.execute(CreateNoteTable);
     } on MissingPlatformDirectoryException {
@@ -106,3 +88,21 @@ const emailColumn = 'email';
 const isSynchedWithCloudColumn = 'is_synched_with_cloud';
 const userIdColumn = 'user_id';
 const textColumn = 'text';
+const CreateNoteTable =
+    '''
+        CREATE TABLE IF NOT EXISTS $notesTable (
+          id INT SERIAL PRIMARY KEY,
+          user_id INT NOT NULL,
+          text TEXT NOT NULL,
+          is_synched_with_cloud BOOLEAN NOT NULL DEFAULT false,
+          FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+      ''';
+
+const createUserTable =
+    '''
+      CREATE TABLE IF NOT EXISTS $userTable (
+        id INT SERIAL PRIMARY KEY ,
+        email TEXT NOT NULL UNIQUE
+      );
+      ''';
