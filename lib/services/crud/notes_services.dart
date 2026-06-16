@@ -19,6 +19,28 @@ class couldNotFoundUser implements Exception {}
 class NotesService {
   Database? _db;
 
+  Future<DatabaseNote> createNote({required DatabaseUser owner}) async {
+    final db = _getDatabaseOrThrow();
+    final dbUser = await getUser(email: owner.email);
+    if (dbUser != owner) {
+      throw couldNotFoundUser();
+    }
+    const text = '';
+    final noteID = await db.insert(notesTable, {
+      userIdColumn: owner.id,
+      textColumn: text,
+      isSynchedWithCloudColumn: 1,
+    });
+
+    final note = DatabaseNote(
+      id: noteID,
+      userId: owner.id,
+      text: text,
+      isSynchedWithCloud: true,
+    );
+    return note;
+  }
+
   Future<DatabaseUser> getUser({required String email}) async {
     final db = _getDatabaseOrThrow();
     final results = await db.query(
@@ -35,7 +57,7 @@ class NotesService {
     }
   }
 
-  Future<DatabaseUser> createUser({required String email}) async {
+  Future<DatabaseUser> createUseifr({required String email}) async {
     final db = _getDatabaseOrThrow();
     final results = await db.query(
       userTable,
