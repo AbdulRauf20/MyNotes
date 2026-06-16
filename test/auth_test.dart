@@ -1,96 +1,98 @@
-import 'dart:io';
-
 import 'package:mynotes/services/auth/auth_exceptions.dart';
 import 'package:mynotes/services/auth/auth_provider.dart';
 import 'package:mynotes/services/auth/auth_user.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Mock Authencation', () {
+  group('Mock Authentication', () {
     final provider = MockAuthProvider();
+
     test('should not be initialized at first', () {
       expect(provider._isInitialized, false);
     });
 
-    test('can not log out if not inilized', () {
+    test('cannot log out if not initialized', () {
       expect(
-        provider.logOut(),
-        throwsA(const TypeMatcher<NotInitializedExcepation>()),
+        () => provider.logOut(),
+        throwsA(const TypeMatcher<NotInitializedException>()),
       );
     });
 
-    test('should be able to be inilized ', () async {
+    test('should be able to initialize', () async {
       await provider.initialize();
       expect(provider._isInitialized, true);
     });
 
-    test('user should be null after iniliazation', () {
+    test('user should be null after initialization', () {
       expect(provider.currentUser, null);
     });
 
     test(
-      'should be able to inilize in less than 2 sec',
+      'should initialize in less than 2 seconds',
       () async {
         await provider.initialize();
         expect(provider._isInitialized, true);
       },
-      timeout: const Timeout(const Duration(seconds: 2)),
+      timeout: const Timeout(Duration(seconds: 2)),
     );
 
-    test('create user should delegate to login funtion', () async {
-      final BadEmailUser = provider.createUser(
-        email: 'mrrauf228@gmail.com',
-        password: 'password',
+    test('create user should delegate to login function', () async {
+      await provider.initialize();
+
+      expect(
+        () => provider.createUser(email: 'bad@email.com', password: 'password'),
+        throwsA(TypeMatcher<UserNotFoundException>()),
       );
 
-      expect(BadEmailUser, throwsA(const TypeMatcher<UserNotFoundException>()));
-      final BadPasswordUser = provider.createUser(
-        email: 'someone@bar.com',
-        password: 'RAUFKHAN',
-      );
       expect(
-        BadPasswordUser,
-        throwsA(const TypeMatcher<WrongPasswordException>()),
+        () =>
+            provider.createUser(email: 'someone@bar.com', password: 'RAUFKHAN'),
+        throwsA(TypeMatcher<WrongPasswordException>()),
       );
 
       final user = await provider.createUser(
-        email: 'mrrauf250@gmail.com',
-        password: 'RAUFKHAN',
+        email: 'test@email.com',
+        password: 'test',
       );
+
       expect(provider.currentUser, user);
       expect(user.isEmailVerified, false);
     });
 
-    test('login user should be able to get verified', () {
-      provider.sendEmailVerification();
+    test('login user should be able to get verified', () async {
+      await provider.initialize();
+
+      await provider.createUser(email: 'test@email.com', password: 'test');
+
+      await provider.sendEmailVerification();
+
       final user = provider.currentUser;
+
       expect(user, isNotNull);
       expect(user!.isEmailVerified, true);
     });
 
-    test('should be able to logout and login aagain', () async {
+    test('should be able to logout and login again', () async {
+      await provider.initialize();
+
+      await provider.createUser(email: 'test@email.com', password: 'test');
+
       await provider.logOut();
-      await provider.logIn(email: 'email', password: 'password');
+
+      await provider.logIn(email: 'test@email.com', password: 'test');
+
       final user = provider.currentUser;
+
       expect(user, isNotNull);
     });
   });
 }
 
-class NotInitializedExcepation implements Exception {}
+class NotInitializedException implements Exception {}
 
 class MockAuthProvider implements AuthProvider {
-  var _isInitialized = false;
+  bool _isInitialized = false;
   AuthUser? _user;
-  @override
-  Future<AuthUser> createUser({
-    required String email,
-    required String password,
-  }) async {
-    if (!_isInitialized) throw NotInitializedExcepation();
-    await Future.delayed(const Duration(seconds: 1));
-    return logIn(email: email, password: password);
-  }
 
   @override
   AuthUser? get currentUser => _user;
@@ -102,29 +104,42 @@ class MockAuthProvider implements AuthProvider {
   }
 
   @override
-  Future<AuthUser> logIn({required String email, required String password}) {
-    if (!_isInitialized) throw NotInitializedExcepation();
-    if (email == 'mrrauf228@gmail.com') throw UserNotFoundException();
+  Future<AuthUser> createUser({
+    required String email,
+    required String password,
+  }) async {
+    if (!_isInitialized) throw NotInitializedException();
+    if (email == 'bad@email.com') throw UserNotFoundException();
     if (password == 'RAUFKHAN') throw WrongPasswordException();
-    const user = AuthUser(isEmailVerified: false);
+    final user = AuthUser(isEmailVerified: false);
     _user = user;
-    return Future.value(user);
+    return user;
+  }
+
+  @override
+  Future<AuthUser> logIn({
+    required String email,
+    required String password,
+  }) async {
+    if (!_isInitialized) throw NotInitializedException();
+    if (email == 'bad@email.com') throw UserNotFoundException();
+    if (password == 'RAUFKHAN') throw WrongPasswordException();
+    final user = AuthUser(isEmailVerified: false);
+    _user = user;
+    return user;
   }
 
   @override
   Future<void> logOut() async {
-    if (!_isInitialized) throw NotInitializedExcepation();
-    if (_user == null) throw UserNotFoundException();
-    await Future.delayed(const Duration(seconds: 1));
+    if (!_isInitialized) throw NotInitializedException();
+    if (_user == null) throw UserNotLoggedInException();
     _user = null;
   }
 
   @override
   Future<void> sendEmailVerification() async {
-    if (!_isInitialized) throw NotInitializedExcepation();
-    final user = _user;
-    if (user == null) throw UserNotFoundException();
-    const newUser = AuthUser(isEmailVerified: true);
-    _user = newUser;
+    if (!_isInitialized) throw NotInitializedException();
+    if (_user == null) throw UserNotLoggedInException();
+    _user = AuthUser(isEmailVerified: true);
   }
 }
