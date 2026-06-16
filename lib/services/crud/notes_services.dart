@@ -1,24 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mynotes/services/crud/crud_exceptions.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart'
     show MissingPlatformDirectoryException, getApplicationDocumentsDirectory;
 import 'package:path/path.dart' show join;
-
-class DatabaseAlreadyOpenException implements Exception {}
-
-class UnableToGetDocumentsDirectory implements Exception {}
-
-class DatabaseIsNotOpen implements Exception {}
-
-class CouldNotDeleteUser implements Exception {}
-
-class userAlreadyExists implements Exception {}
-
-class couldNotFoundUser implements Exception {}
-
-class couldNotDeleteNote implements Exception {}
-
-class couldNotFoundNote implements Exception {}
 
 class NotesService {
   Database? _db;
@@ -28,6 +13,23 @@ class NotesService {
     final notes = await db.query(notesTable);
 
     return notes.map((noteRow) => DatabaseNote.fromRow(noteRow)).toList();
+  }
+
+  Future<DatabaseNote> updateNote({
+    required DatabaseNote note,
+    required String text,
+  }) async {
+    final db = _getDatabaseOrThrow();
+    final updatedCount = await db.update(notesTable, {
+      textColumn: text,
+      isSynchedWithCloudColumn: 0,
+    });
+
+    if (updatedCount == 0) {
+      throw couldNotUpdateNote();
+    } else {
+      return await getNote(id: note.id);
+    }
   }
 
   Future<DatabaseNote> getNote({required int id}) async {
