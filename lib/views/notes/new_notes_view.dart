@@ -29,6 +29,11 @@ void _textConrtollerListener() async {
   await _notesService.updateNote(note: note, text: text);
 }
 
+void _setupTextControllerListener() {
+  _textConrtoller.removeListener(_textConrtollerListener);
+  _textConrtoller.addListener(_textConrtollerListener);
+}
+
   DatabaseNote? _note;
   late final NotesService _notesService;
   late final TextEditingController _textConrtoller;
