@@ -73,7 +73,20 @@ class _NotesViewState extends State<NotesView> {
                       if (snapshot.hasData) {
                         final allNotes =
                             snapshot.data as Iterable<DatabaseNote>;
-                        return const Text('Got all the notes');
+                        return ListView.builder(
+                          itemCount: allNotes.length,
+                          itemBuilder: (context, index) {
+                            final note = allNotes.elementAt(index);
+                            return ListTile(
+                              title: Text(
+                                note.text,
+                                maxLines: 1,
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          },
+                        );
                       } else {
                         return const CircularProgressIndicator();
                       }
