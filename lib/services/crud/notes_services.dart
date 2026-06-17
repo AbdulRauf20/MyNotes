@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mynotes/services/crud/crud_exceptions.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart'
@@ -16,8 +15,8 @@ class NotesService {
 
   factory NotesService() => _shared;
 
-
-  final notesStreamController = StreamController<List<DatabaseNote>>.broadcast();
+  final notesStreamController =
+      StreamController<List<DatabaseNote>>.broadcast();
 
   Stream<List<DatabaseNote>> get allNotes => notesStreamController.stream;
 
@@ -28,7 +27,7 @@ class NotesService {
     } on couldNotFoundUser {
       final createdUser = await createUseifr(email: email);
       return createdUser;
-    } catch (e){
+    } catch (e) {
       rethrow;
     }
   }
@@ -37,9 +36,7 @@ class NotesService {
     final allNotes = await getAllNotes();
     _notes = allNotes.toList();
     notesStreamController.add(_notes);
-  } 
-  
-
+  }
 
   Future<Iterable<DatabaseNote>> getAllNotes() async {
     final db = _getDatabaseOrThrow();
@@ -85,14 +82,14 @@ class NotesService {
     if (notes.isEmpty) {
       throw couldNotFoundNote();
     } else {
-      final note =  DatabaseNote.fromRow(notes.first);
+      final note = DatabaseNote.fromRow(notes.first);
       _notes.add(note);
       notesStreamController.add(_notes);
       return note;
     }
   }
 
-  Future<int> deleteAllNotes() async { 
+  Future<int> deleteAllNotes() async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final noOfDeletion = await db.delete(notesTable);
@@ -111,7 +108,7 @@ class NotesService {
 
     if (deleteCount == 0) {
       throw couldNotDeleteNote();
-    } else{
+    } else {
       _notes.removeWhere((note) => note.id == id);
       notesStreamController.add(_notes);
     }
@@ -213,7 +210,7 @@ class NotesService {
     }
   }
 
-  Future<void> _ensureDbIsOpen() async{
+  Future<void> _ensureDbIsOpen() async {
     try {
       await open();
     } on DatabaseAlreadyOpenException {
@@ -221,7 +218,7 @@ class NotesService {
     }
   }
 
-  Future<void> open() async { 
+  Future<void> open() async {
     if (_db != null) throw DatabaseAlreadyOpenException();
     try {
       final docsPath = await getApplicationDocumentsDirectory();
