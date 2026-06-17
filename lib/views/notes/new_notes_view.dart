@@ -76,7 +76,26 @@ void _setupTextControllerListener() {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('New Note')),
-      body: const Text('write your new note here....'),
+      body: FutureBuilder(
+        future: createNewNote(),
+        builder: (context, snapshot){
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+              _note = snapshot.data;
+              _setupTextControllerListener();
+              return TextField(
+                controller: _textConrtoller,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: 'write your new note here....',
+                ),
+              );
+            default:
+              return const CircularProgressIndicator();
+          }
+        },
+      ),
     );
   }
 }
