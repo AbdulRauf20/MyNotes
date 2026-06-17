@@ -21,11 +21,6 @@ class _NotesViewState extends State<NotesView> {
     _notesService.open();
     super.initState();
   }
-  void dispose(){
-    _notesService.Close();
-    super.dispose();
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +28,12 @@ class _NotesViewState extends State<NotesView> {
       appBar: AppBar(
         title: const Text('Your Notes'),
         actions: [
-          IconButton(onPressed:(){
-            Navigator.of(context).pushNamed(newNoteRoute);
-          }, icon: const Icon(Icons.add)),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed(newNoteRoute);
+            },
+            icon: const Icon(Icons.add),
+          ),
 
           PopupMenuButton<MenuAction>(
             onSelected: (value) async {
@@ -64,22 +62,29 @@ class _NotesViewState extends State<NotesView> {
       body: FutureBuilder(
         future: _notesService.getOrCreateUser(email: useerEmail),
         builder: (context, snapshot) {
-          switch(snapshot){
+          switch (snapshot) {
             case ConnectionState.done:
-              return StreamBuilder(stream: _notesService.allNotes, builder: (context, notesSnapshot){
-                switch(notesSnapshot.connectionState){
-                  case ConnectionState.waiting:
-                  case ConnectionState.active:
-                  return const Text('Waiting for all notes ....');
+              return StreamBuilder(
+                stream: _notesService.allNotes,
+                builder: (context, notesSnapshot) {
+                  switch (notesSnapshot.connectionState) {
+                    case ConnectionState.waiting:
+                    case ConnectionState.active:
+                      if (snapshot.hasData) {
+                        final allNotes =
+                            snapshot.data as Iterable<DatabaseNote>;
+                        return const Text('Got all the notes');
+                      } else {
+                        return const CircularProgressIndicator();
+                      }
+                    default:
+                      return const CircularProgressIndicator();
+                  }
+                },
+              );
 
-                  default:
-                    return const CircularProgressIndicator();
-                }
-                
-              });
-
-                default:
-            return  const CircularProgressIndicator();
+            default:
+              return const CircularProgressIndicator();
           }
         },
       ),
