@@ -16,7 +16,6 @@ class NotesService {
       onListen: () {
         notesStreamController.sink.add(_notes);
       },
-      
     );
   }
 
@@ -59,10 +58,12 @@ class NotesService {
     final db = _getDatabaseOrThrow();
 
     //update DB
-    final updatedCount = await db.update(notesTable, {
-      textColumn: text,
-      isSynchedWithCloudColumn: 0,
-    });
+    final updatedCount = await db.update(
+      notesTable,
+      {textColumn: text, isSynchedWithCloudColumn: 0},
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
 
     if (updatedCount == 0) {
       throw couldNotUpdateNote();
