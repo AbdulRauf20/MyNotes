@@ -2,43 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/services/crud/notes_services.dart';
+import 'package:mynotes/utilities/generics/get_argument.dart';
 
-class NewNotesView extends StatefulWidget {
-  const NewNotesView({super.key});
+class CreateUpdateNoteView extends StatefulWidget {
+  const CreateUpdateNoteView({super.key});
 
   @override
-  State<NewNotesView> createState() => _NewNotesViewState();
+  State<CreateUpdateNoteView> createState() => _CreateUpdateNoteViewState();
 }
 
-class _NewNotesViewState extends State<NewNotesView> {
-
-
-@override
-void initState() {
-  super.initState();
-  _notesService = NotesService();
-  _textConrtoller = TextEditingController();
-}
-
-void _textConrtollerListener() async {
-  final note = _note;
-  if (note == null) {
-    return;
+class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
+  @override
+  void initState() {
+    super.initState();
+    _notesService = NotesService();
+    _textConrtoller = TextEditingController();
   }
-  final text = _textConrtoller.text;
-  await _notesService.updateNote(note: note, text: text);
-}
 
-void _setupTextControllerListener() {
-  _textConrtoller.removeListener(_textConrtollerListener);
-  _textConrtoller.addListener(_textConrtollerListener);
-}
+  void _textConrtollerListener() async {
+    final note = _note;
+    if (note == null) {
+      return;
+    }
+    final text = _textConrtoller.text;
+    await _notesService.updateNote(note: note, text: text);
+  }
+
+  void _setupTextControllerListener() {
+    _textConrtoller.removeListener(_textConrtollerListener);
+    _textConrtoller.addListener(_textConrtollerListener);
+  }
 
   DatabaseNote? _note;
   late final NotesService _notesService;
   late final TextEditingController _textConrtoller;
 
-  Future<DatabaseNote> createNewNote() async {
+  Future<DatabaseNote> CreateOrGetExistingNote(BuildContext) async {
+    final widgetNote = context.getArugment<DatabaseNote>();
+
+    if (widgetNote != null) {
+      _note = widgetNote;
+      _textConrtoller.text = widgetNote.text;
+      return widgetNote;
+    }
+
     final existingNote = _note;
     if (existingNote != null) {
       return existingNote;
@@ -46,7 +53,9 @@ void _setupTextControllerListener() {
     final currentUser = AuthService.firebase().currentUser!;
     final email = currentUser.email!;
     final owner = await _notesService.getUser(email: email);
-    return await _notesService.createNote(owner: owner);
+    final newNote = await _notesService.createNote(owner: owner);
+    _note = newNote;
+    return newNote;
   }
 
   void _deleteNoteIfTextIsEmpty() {
@@ -65,7 +74,7 @@ void _setupTextControllerListener() {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     _deleteNoteIfTextIsEmpty();
     _saveNoteIfTextNotEmpty();
     _textConrtoller.dispose();
@@ -77,11 +86,10 @@ void _setupTextControllerListener() {
     return Scaffold(
       appBar: AppBar(title: const Text('New Note')),
       body: FutureBuilder(
-        future: createNewNote(),
-        builder: (context, snapshot){
+        future: CreateOrGetExistingNote(context),
+        builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
-              _note = snapshot.data;
               _setupTextControllerListener();
               return TextField(
                 controller: _textConrtoller,
