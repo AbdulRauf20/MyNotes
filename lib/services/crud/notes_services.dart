@@ -6,14 +6,12 @@ import 'package:path_provider/path_provider.dart'
     show MissingPlatformDirectoryException, getApplicationDocumentsDirectory;
 import 'package:path/path.dart' show join;
 
-
-
 class NotesService {
   Database? _db;
 
   List<DatabaseNote> _notes = [];
 
-  DatabaseUser? _user; 
+  DatabaseUser? _user;
 
   static final NotesService _shared = NotesService._sharedInstance();
   NotesService._sharedInstance() {
@@ -27,25 +25,29 @@ class NotesService {
   factory NotesService() => _shared;
 
   late final StreamController<List<DatabaseNote>> notesStreamController;
-  Stream<List<DatabaseNote>> get allNotes => notesStreamController.stream.filter((note) {
-    final currentUser = _user;
-    if(currentUser != null){
-      return note.userId == currentUser.id;
-    } else {
-      throw userShouldBeSetBeforeReadingAllNotes();
-    }
-  });
+  Stream<List<DatabaseNote>> get allNotes =>
+      notesStreamController.stream.filter((note) {
+        final currentUser = _user;
+        if (currentUser != null) {
+          return note.userId == currentUser.id;
+        } else {
+          throw userShouldBeSetBeforeReadingAllNotes();
+        }
+      });
 
-  Future<DatabaseUser> getOrCreateUser({required String email, bool setAsCurrentUser = true}) async {
+  Future<DatabaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurrentUser = true,
+  }) async {
     try {
       final user = await getUser(email: email);
-      if(setAsCurrentUser){
+      if (setAsCurrentUser) {
         _user = user;
       }
       return user;
     } on couldNotFoundUser {
       final createdUser = await createUseifr(email: email);
-      if(setAsCurrentUser){
+      if (setAsCurrentUser) {
         _user = createdUser;
       }
       return createdUser;

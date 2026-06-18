@@ -96,6 +96,8 @@ class MockAuthProvider implements AuthProvider {
 
   @override
   AuthUser? get currentUser => _user;
+  
+  get email => null;
 
   @override
   Future<void> initialize() async {
@@ -111,7 +113,7 @@ class MockAuthProvider implements AuthProvider {
     if (!_isInitialized) throw NotInitializedException();
     if (email == 'bad@email.com') throw UserNotFoundException();
     if (password == 'RAUFKHAN') throw WrongPasswordException();
-    final user = AuthUser(isEmailVerified: false);
+    final user = AuthUser(isEmailVerified: false, id: '', email: email);
     _user = user;
     return user;
   }
@@ -124,7 +126,7 @@ class MockAuthProvider implements AuthProvider {
     if (!_isInitialized) throw NotInitializedException();
     if (email == 'bad@email.com') throw UserNotFoundException();
     if (password == 'RAUFKHAN') throw WrongPasswordException();
-    final user = AuthUser(isEmailVerified: false);
+    final user = AuthUser(isEmailVerified: false, id: '', email: email);
     _user = user;
     return user;
   }
@@ -140,6 +142,6 @@ class MockAuthProvider implements AuthProvider {
   Future<void> sendEmailVerification() async {
     if (!_isInitialized) throw NotInitializedException();
     if (_user == null) throw UserNotLoggedInException();
-    _user = AuthUser(isEmailVerified: true);
+    _user = AuthUser(isEmailVerified: true, id: '', email: email!);
   }
 }
