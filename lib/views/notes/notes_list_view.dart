@@ -8,7 +8,7 @@ typedef NoteCallback = void Function(CloudNote note);
 
 class NotesListView extends StatelessWidget {
   final Iterable<CloudNote> notes;
-  final NoteCallback onDeleteNote;
+  final NoteCallback onDeleteNote;  
   final NoteCallback onTap;
 
   const NotesListView({
