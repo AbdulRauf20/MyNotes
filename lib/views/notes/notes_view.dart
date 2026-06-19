@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/enums/menu_action.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
-import 'package:mynotes/services/crud/notes_services.dart';
+import 'package:mynotes/services/cloud/cloud_note.dart';
+import 'package:mynotes/services/cloud/firebase_cloud_stroage.dart';
 import 'package:mynotes/utilities/dialog/logOut_dialog.dart';
 import 'package:mynotes/views/notes/notes_list_view.dart';
 
@@ -14,13 +15,12 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-  late final NotesService _notesService;
-  String get useerEmail => AuthService.firebase().currentUser?.email ?? '';
+  late final FirebaseCloudStroage _notesService;
+  String get userID => AuthService.firebase().currentUser?.id ?? '';
 
   @override
   void initState() {
-    _notesService = NotesService();
-    _notesService.open();
+    _notesService = FirebaseCloudStroage();
     super.initState();
   }
 
@@ -61,24 +61,19 @@ class _NotesViewState extends State<NotesView> {
           ),
         ],
       ),
-      body: FutureBuilder(
-        future: _notesService.getOrCreateUser(email: useerEmail),
-        builder: (context, snapshot) {
-          switch (snapshot) {
-            case ConnectionState.done:
-              return StreamBuilder(
-                stream: _notesService.allNotes,
+      body: StreamBuilder(
+                stream: _notesService.allNotes(ownerUserId: userID),
                 builder: (context, notesSnapshot) {
                   switch (notesSnapshot.connectionState) {
                     case ConnectionState.waiting:
                     case ConnectionState.active:
-                      if (snapshot.hasData) {
+                      if (notesSnapshot.hasData) {
                         final allNotes =
-                            snapshot.data as Iterable<DatabaseNote>;
+                            notesSnapshot.data as Iterable<CloudNote>;
                         return NotesListView(
                           notes: allNotes.toList(),
                           onDeleteNote: (note) async {
-                            await _notesService.deleteNote(id: note.id);
+                            await _notesService.DeleteNote(documentId: note.documentId);
                           },
                           onTap: (note) {
                             Navigator.of(
@@ -93,13 +88,7 @@ class _NotesViewState extends State<NotesView> {
                       return const CircularProgressIndicator();
                   }
                 },
-              );
-
-            default:
-              return const CircularProgressIndicator();
-          }
-        },
-      ),
+              ),
     );
   }
 }
