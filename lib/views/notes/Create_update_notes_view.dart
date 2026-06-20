@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
-import 'package:mynotes/services/crud/notes_services.dart';
 import 'package:mynotes/utilities/dialogs/cannot_share_empty_note.dart';
 import 'package:mynotes/utilities/generics/get_argument.dart';
 import 'package:mynotes/services/cloud/cloud_note.dart';
-import 'package:mynotes/services/cloud/cloud_Stroage_exceptions.dart';
 import 'package:mynotes/services/cloud/firebase_cloud_stroage.dart';
 import 'package:share_plus/share_plus.dart';
 
