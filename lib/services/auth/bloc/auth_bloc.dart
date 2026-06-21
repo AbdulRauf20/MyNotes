@@ -24,7 +24,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final user = await provider.logIn(email: email, password: password);
         emit(AuthStateLoggedIn(user: user));
       } on Exception catch (e){
-        emit(AuthStateLoginFailure(exception: e));
+        emit(AuthStateLoggedOut(exception: e));
       }
     });
 
