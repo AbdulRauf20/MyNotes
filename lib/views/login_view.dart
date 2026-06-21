@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/services/auth/auth_exceptions.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
+import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
+import 'package:mynotes/services/auth/bloc/auth_event.dart';
 import 'package:mynotes/utilities/dialog/error_dialog.dart';
 import 'package:mynotes/views/verify_email_view.dart';
 import 'package:mynotes/main.dart';
@@ -59,37 +62,11 @@ class _LoginViewState extends State<LoginView> {
               final password = _password.text;
 
               try {
-                AuthService.firebase().logIn(email: email, password: password);
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil(notesRoute, (route) => false);
-                final user = AuthService.firebase().currentUser;
-
-                if (user != null && !user.isEmailVerified) {
-                  await AuthService.firebase().sendEmailVerification();
-
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Please verify your email. Check your inbox!',
-                        ),
-                      ),
-                    );
-
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const VerifyEmailView(),
-                      ),
-                    );
-                  }
-                } else {
-                  if (mounted) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const HomePage()),
-                    );
-                  }
-                }
+                context.read<AuthBloc>().add(
+                  AuthEventLogIn(
+                    email: email,
+                    password: password),
+                );
               } on UserNotFoundException {
                 await showErrorDialog(context, 'User not found');
               } on WrongPasswordException {
