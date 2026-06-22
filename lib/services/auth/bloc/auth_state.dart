@@ -7,8 +7,8 @@ abstract class AuthState {
   const AuthState();
 }
 
-class AuthEventUninitialized extends AuthState {
-  const AuthEventUninitialized();
+class AuthStateUninilized extends AuthState {
+  const AuthStateUninilized();
 }
 
 class AuthStateRegistering extends AuthState {
