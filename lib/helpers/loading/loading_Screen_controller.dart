@@ -9,6 +9,4 @@ class LoadingScreenController {
   final UpdateLoadingScreen update;
 
   const LoadingScreenController({required this.close, required this.update}); 
-
-  
 }
